@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a3a2a">
+<title>Kontrola Primke</title>
+<style>
+:root {
+  --gd: #1a3a2a;
+  --gm: #2d6a4f;
+  --gl: #52b788;
+  --gp: #d8f3dc;
+  --amber: #e9a800;
+  --red: #c0392b;
+  --red-p: #fdecea;
+  --blue: #1565c0;
+  --blue-p: #e3f2fd;
+  --g9: #1c1c1e;
+  --g7: #3a3a3c;
+  --g5: #636366;
+  --g3: #c7c7cc;
+  --g1: #f2f2f7;
+  --white: #ffffff;
+  --border: #d1d5db;
+  --sh: 0 2px 8px rgba(0,0,0,0.12);
+  --r: 12px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+  background: var(--g1);
+  color: var(--g9);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* ══ HEADER ══ */
+.header {
+  background: var(--gd);
+  color: white;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 10px;
+}
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 40px; height: 40px; background: var(--gl);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.logo-text h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.logo-text p { font-size: 11px; opacity: 0.65; margin-top: 1px; }
+.header-btns { display: flex; gap: 6px; }
+.icon-btn {
+  background: rgba(255,255,255,0.15); border: none; color: white;
+  border-radius: 8px; padding: 8px 10px; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn:active { background: rgba(255,255,255,0.3); }
+
+/* Meta polja u headeru */
+.meta-bar {
+  background: var(--gm);
+  padding: 10px 16px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.meta-field label {
+  display: block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.6); margin-bottom: 3px;
+}
+.meta-field input {
+  width: 100%; padding: 8px 10px;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 8px; color: white;
+  font-size: 14px; font-weight: 500;
+}
+.meta-field input::placeholder { color: rgba(255,255,255,0.4); }
+.meta-field input:focus { outline: none; border-color: var(--gl); background: rgba(255,255,255,0.22); }
+.meta-full { grid-column: 1 / -1; }
+
+/* ══ STATS BAR ══ */
+.stats-bar {
+  display: flex; gap: 8px; padding: 12px 16px;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.stats-bar::-webkit-scrollbar { display: none; }
+.stat-pill {
+  flex: 0 0 auto; scroll-snap-align: start;
+  background: white; border-radius: 10px;
+  padding: 8px 14px; text-align: center;
+  box-shadow: var(--sh); min-width: 80px;
+}
+.stat-pill .sl { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--g5); margin-bottom: 2px; }
+.stat-pill .sv { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-pill.ok .sv { color: var(--gm); }
+.stat-pill.bad .sv { color: var(--red); }
+.diff-chip {
+  flex: 0 0 auto; display: flex; align-items: center;
+  padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 700;
+}
+.diff-chip.ok { background: var(--gp); color: var(--gm); }
+.diff-chip.bad { background: var(--red-p); color: var(--red); }
+
+/* ══ TOOLBAR ══ */
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; background: white;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.toolbar-left { display: flex; gap: 6px; }
+.filter-sel {
+  padding: 7px 10px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: 13px; background: var(--g1);
+  color: var(--g7); max-width: 140px;
+}
+
+/* ══ FAB (Floating Add Button) ══ */
+.fab {
+  position: fixed; bottom: calc(20px + var(--safe-bottom)); right: 20px;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: var(--gl); color: var(--gd); border: none;
+  font-size: 28px; font-weight: 700; box-shadow: 0 4px 20px rgba(82,183,136,0.5);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 40; transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab:active { transform: scale(0.93); box-shadow: 0 2px 10px rgba(82,183,136,0.4); }
+
+/* ══ LISTA STABALA ══ */
+.stablo-lista {
+  padding: 12px 16px;
+  padding-bottom: calc(90px + var(--safe-bottom));
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.stablo-card {
+  background: white; border-radius: var(--r);
+  box-shadow: var(--sh); overflow: hidden;
+  border-left: 4px solid var(--g3);
+  transition: border-color 0.2s;
+}
+.stablo-card.has-diff { border-left-color: var(--red); }
+.stablo-card.ok { border-left-color: var(--gl); }
+
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-header-left { display: flex; align-items: center; gap: 10px; }
+.card-num {
+  width: 28px; height: 28px; background: var(--g1);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--g5); flex-shrink: 0;
+}
+.card-title { font-weight: 700; font-size: 15px; color: var(--g9); }
+.card-sub { font-size: 12px; color: var(--g5); margin-top: 1px; }
+.card-header-right { display: flex; align-items: center; gap: 8px; }
+.diff-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--g3); flex-shrink: 0;
+}
+.diff-dot.bad { background: var(--red); }
+.diff-dot.ok { background: var(--gl); }
+.card-chevron { font-size: 13px; color: var(--g3); transition: transform 0.2s; }
+.stablo-card.expanded .card-chevron { transform: rotate(180deg); }
+
+.card-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--g1);
+}
+.stablo-card.expanded .card-body { display: block; }
+
+/* Grid za unos podataka */
+.data-section {
+  margin-top: 12px;
+}
+.section-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 8px; padding: 4px 8px;
+  border-radius: 6px; display: inline-block;
+}
+.sl-kontrolni { background: #e8f4fd; color: #1565c0; }
+.sl-redovni { background: var(--gp); color: var(--gm); }
+.sl-razlike { background: #fef4e8; color: #b45309; }
+
+.input-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;
+}
+.input-row.trio { grid-template-columns: 1fr 1fr 1fr; }
+.input-row.single { grid-template-columns: 1fr; }
+
+.field-group { display: flex; flex-direction: column; gap: 3px; }
+.field-group label {
+  font-size: 11px; font-weight: 600; color: var(--g5);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.field-group input, .field-group select {
+  padding: 10px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: 15px; color: var(--g9);
+  background: var(--g1); width: 100%;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s;
+}
+.field-group input:focus, .field-group select:focus {
+  outline: none; border-color: var(--gl); background: white;
+}
+.field-group input[type=number] { font-variant-numeric: tabular-nums; }
+
+/* Razlike prikaz */
+.diff-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px;
+}
+.diff-box {
+  background: var(--g1); border-radius: 8px; padding: 8px;
+  text-align: center;
+}
+.diff-box .dl { font-size: 10px; font-weight: 700; color: var(--g5);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+.diff-box .dv {
+  font-size: 14px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dv.pos { color: var(--red); }
+.dv.neg { color: var(--blue); }
+.dv.zero { color: var(--g3); font-weight: 400; }
+.dv.diff-klas { color: var(--red); font-size: 11px; }
+
+/* Foto i akcije */
+.card-actions {
+  display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+}
+.act-btn {
+  padding: 9px 14px; border-radius: 8px; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  -webkit-tap-highlight-color: transparent;
+}
+.act-btn:active { opacity: 0.7; }
+.act-btn.foto { background: var(--blue-p); color: var(--blue); }
+.act-btn.foto.has-photos { background: var(--gp); color: var(--gm); }
+.act-btn.del { background: var(--red-p); color: var(--red); margin-left: auto; }
+
+/* ══ EMPTY STATE ══ */
+.empty-state {
+  text-align: center; padding: 60px 24px;
+  color: var(--g5);
+}
+.empty-state .ei { font-size: 56px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: var(--g7); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; line-height: 1.6; }
+
+/* ══ MODAL (generalni) ══ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 200;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 20px 20px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+  animation: slideUp 0.25s ease;
+}
+.modal-center {
+  align-items: center; justify-content: center;
+}
+.modal-center .modal {
+  border-radius: 16px; max-width: 480px; width: 94%;
+  padding-bottom: 20px;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.modal-handle {
+  width: 40px; height: 4px; background: var(--g3);
+  border-radius: 2px; margin: 0 auto 16px;
+}
+.modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--g9); }
+.modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+.modal-btns .btn { flex: 1; padding: 13px; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-cancel { background: var(--g1); color: var(--g7); }
+.btn-confirm { background: var(--gl); color: var(--gd); }
+.btn-red { background: var(--red); color: white; }
+.btn-pdf { background: #e53935; color: white; }
+
+/* Menu modal */
+.menu-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 4px; border-bottom: 1px solid var(--g1);
+  cursor: pointer; font-size: 15px; font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { background: var(--g1); border-radius: 8px; }
+.menu-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.mi-green { background: var(--gp); }
+.mi-blue  { background: var(--blue-p); }
+.mi-amber { background: #fff8e1; }
+.mi-red   { background: var(--red-p); }
+
+/* ══ FOTO MODAL ══ */
+.photo-upload-zone {
+  border: 2.5px dashed var(--gl); border-radius: 12px;
+  padding: 28px 20px; text-align: center;
+  color: var(--g5); margin-bottom: 14px;
+  cursor: pointer; background: var(--gp);
+  -webkit-tap-highlight-color: transparent;
+}
+.photo-upload-zone .puz { font-size: 36px; margin-bottom: 8px; }
+.photo-upload-zone p { font-size: 14px; font-weight: 600; color: var(--gm); }
+.photo-upload-zone small { font-size: 12px; color: var(--g5); }
+.photo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;
+}
+.photo-item {
+  position: relative; border-radius: 10px; overflow: hidden;
+  aspect-ratio: 1; background: var(--g1); border: 1px solid var(--border);
+}
+.photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-del {
+  position: absolute; top: 5px; right: 5px;
+  background: rgba(0,0,0,0.65); color: white; border: none;
+  border-radius: 50%; width: 26px; height: 26px; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+
+/* ══ UVOZ MODAL ══ */
+.modal textarea {
+  width: 100%; height: 130px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 10px; font-size: 13px; font-family: monospace;
+  resize: vertical; background: var(--g1);
+}
+.modal textarea:focus { outline: none; border-color: var(--gl); }
+
+/* ══ PDF OVERLAY ══ */
+.pdf-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 500;
+  flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+}
+.pdf-overlay.open { display: flex; }
+.pdf-spinner {
+  width: 52px; height: 52px;
+  border: 5px solid rgba(255,255,255,0.25);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+.pdf-overlay p { color: white; font-size: 15px; font-weight: 600; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══ TOAST ══ */
+.toast {
+  position: fixed; bottom: calc(84px + var(--safe-bottom)); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--gd); color: white;
+  padding: 11px 22px; border-radius: 30px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 300;
+  opacity: 0; transition: all 0.25s; white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ══ PRINT ══ */
+@media print {
+  .fab, .header-btns, .toolbar, .card-actions, .card-chevron,
+  .field-group input, .field-group select, .toast, .modal-overlay { display: none !important; }
+  .stablo-card { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">
+      <div class="logo-icon">🌲</div>
+      <div class="logo-text">
+        <h1>Kontrola Primke</h1>
+        <p>Šumsko gazdinstvo &nbsp;·&nbsp; offline</p>
+      </div>
+    </div>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="otvoriMeni()" title="Meni">⋮</button>
+    </div>
+  </div>
+  <div class="meta-bar">
+    <div class="meta-field">
+      <label>Odjel / Lokacija</label>
+      <input type="text" id="meta-odjel" placeholder="Npr. Odjel 15">
+    </div>
+    <div class="meta-field">
+      <label>Datum</label>
+      <input type="date" id="meta-datum">
+    </div>
+    <div class="meta-field">
+      <label>Kontrolor</label>
+      <input type="text" id="meta-kontrolor" placeholder="Ime i prezime">
+    </div>
+    <div class="meta-field">
+      <label>Br. primke</label>
+      <input type="text" id="meta-primka" placeholder="SO-2024-001">
+    </div>
+    <div class="meta-field meta-full">
+      <label>Napomena</label>
+      <input type="text" id="meta-napomena" placeholder="Opća napomena...">
+    </div>
+  </div>
+</div>
+
+<!-- ══ STATS BAR ══ -->
+<div class="stats-bar" id="stats-bar">
+  <div class="stat-pill">
+    <div class="sl">Stabala</div>
+    <div class="sv" id="stat-ukupno">0</div>
+  </div>
+  <div class="stat-pill" id="sc-prec">
+    <div class="sl">Δ Prečnik</div>
+    <div class="sv" id="stat-prec">0</div>
+  </div>
+  <div class="stat-pill" id="sc-duz">
+    <div class="sl">Δ Dužina</div>
+    <div class="sv" id="stat-duz">0</div>
+  </div>
+  <div class="stat-pill" id="sc-klas">
+    <div class="sl">Δ Klasa</div>
+    <div class="sv" id="stat-klas">0</div>
+  </div>
+  <div class="stat-pill">
+    <div class="sl">Zap. K (m³)</div>
+    <div class="sv" id="stat-vk">0.00</div>
+  </div>
+  <div class="stat-pill">
+    <div class="sl">Zap. R (m³)</div>
+    <div class="sv" id="stat-vr">0.00</div>
+  </div>
+  <div class="stat-pill" id="sc-vd">
+    <div class="sl">Δ Zap. (m³)</div>
+    <div class="sv" id="stat-vd">0.00</div>
+  </div>
+  <div class="diff-chip ok" id="diff-badge">✓ Bez razlika</div>
+</div>
+
+<!-- ══ TOOLBAR ══ -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <select class="filter-sel" id="filter-vrsta" onchange="renderLista()">
+      <option value="">Sve vrste</option>
+    </select>
+    <select class="filter-sel" id="filter-razlika" onchange="renderLista()">
+      <option value="">Svi redovi</option>
+      <option value="diff">S razlikama</option>
+      <option value="ok">Bez razlika</option>
+    </select>
+  </div>
+  <span style="font-size:12px;color:var(--g5);" id="filter-count"></span>
+</div>
+
+<!-- ══ LISTA ══ -->
+<div class="stablo-lista" id="stablo-lista">
+  <div class="empty-state">
+    <div class="ei">🌲</div>
+    <h3>Nema stabala</h3>
+    <p>Dodaj prvo stablo klikom na zeleno <strong>+</strong> dugme u donjem desnom uglu.</p>
+  </div>
+</div>
+
+<!-- ══ FAB ══ -->
+<button class="fab" onclick="addRow()" title="Dodaj stablo">+</button>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ MENI MODAL ══ -->
+<div class="modal-overlay" id="modal-meni" onclick="zatvoriModal('modal-meni')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h3>Opcije</h3>
+    <div class="menu-item" onclick="spremi();zatvoriModal('modal-meni')">
+      <div class="menu-icon mi-green">💾</div>
+      <div>
+        <div>Spremi / Preuzmi JSON</div>
+        <div style="font-size:12px;color:var(--g5);">Čuva sve podatke lokalno i preuzima fajl</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="ucitajSpremljeno();zatvoriModal('modal-meni')">
+      <div class="menu-icon mi-blue">📂</div>
+      <div>
+        <div>Učitaj JSON</div>
+        <div style="font-size:12px;color:var(--g5);">Otvori prethodno sačuvan fajl</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="exportCSV();zatvoriModal('modal-meni')">
+      <div class="menu-icon mi-amber">📊</div>
+      <div>
+        <div>Izvezi CSV</div>
+        <div style="font-size:12px;color:var(--g5);">Za Excel / LibreOffice</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="exportPDF();zatvoriModal('modal-meni')">
+      <div class="menu-icon mi-red">📄</div>
+      <div>
+        <div>Generiraj PDF izvještaj</div>
+        <div style="font-size:12px;color:var(--g5);">Uključuje podatke i fotografije</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="otvoriUvoz();zatvoriModal('modal-meni')">
+      <div class="menu-icon mi-blue">📋</div>
+      <div>
+        <div>Uvezi tekst / CSV</div>
+        <div style="font-size:12px;color:var(--g5);">Zalijepi podatke iz clipboard-a</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="novaLista();zatvoriModal('modal-meni')" style="color:var(--red)">
+      <div class="menu-icon mi-red">🗑</div>
+      <div>
+        <div>Nova lista (obriši sve)</div>
+        <div style="font-size:12px;color:var(--g5);">Briše sva stabla i resetuje formu</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ UVOZ MODAL ══ -->
+<div class="modal-overlay" id="modal-uvoz">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h3>Uvezi podatke</h3>
+    <p style="font-size:13px;color:var(--g5);margin-bottom:12px;">
+      Format (separator <strong>;</strong> ili TAB):<br>
+      <code style="font-size:11px;background:var(--g1);padding:3px 6px;border-radius:4px;">Bukva;4841;37;2.20;Trupac I;napomena;37;2.20;Trupac I</code>
+    </p>
+    <textarea id="uvoz-tekst" placeholder="Zalijepi podatke ovdje..."></textarea>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="zatvoriModal('modal-uvoz')">Odustani</button>
+      <button class="btn btn-confirm" onclick="uvezi()">Uvezi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOTO MODAL ══ -->
+<div class="modal-overlay modal-center" id="modal-foto">
+  <div class="modal" onclick="event.stopPropagation()" style="border-radius:16px;max-width:480px;width:94%;padding-bottom:20px;">
+    <div class="modal-handle"></div>
+    <h3 id="foto-modal-title">📷 Fotografije</h3>
+    <div class="photo-upload-zone" onclick="document.getElementById('foto-file-input').click()">
+      <div class="puz">📸</div>
+      <p>Tapni za dodavanje fotografija</p>
+      <small>JPG, PNG, WEBP – kamera ili galerija</small>
+    </div>
+    <input type="file" id="foto-file-input" accept="image/*" multiple capture="environment" style="display:none" onchange="handleFotoFiles(event)">
+    <div class="photo-grid" id="foto-grid"></div>
+    <p id="foto-empty" style="font-size:13px;color:var(--g5);text-align:center;padding:8px 0;display:none;">Nema fotografija.</p>
+    <div class="modal-btns" style="margin-top:8px;">
+      <button class="btn btn-cancel" onclick="zatvoriModal('modal-foto')">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PDF OVERLAY ══ -->
+<div class="pdf-overlay" id="pdf-overlay">
+  <div class="pdf-spinner"></div>
+  <p>Generiranje PDF-a...</p>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  KONSTANTE
+// ══════════════════════════════════════════
+const VRSTE = ['Bukva','Jela','Smrča','Javor','Jasen','Lipa'];
+
+const SORTIMENTI = [
+  'Trupac I','Trupac II','Trupac III',
+  'Furnirski trupac',
+  'Celuloza duga','Celuloza kratka',
+  'Rudničko drvo',
+  'Ogrijev dugi','Ogrijev kratki',
+  'Ostalo tehničko','Otpad',''
+];
+
+// ══════════════════════════════════════════
+//  STANJE
+// ══════════════════════════════════════════
+let rows = [];
+let idCnt = 0;
+let currentFotoId = null;
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('meta-datum').value = new Date().toISOString().split('T')[0];
+
+  // Popuni filter
+  const fv = document.getElementById('filter-vrsta');
+  VRSTE.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v; fv.appendChild(o);
+  });
+
+  // Autosave
+  const saved = localStorage.getItem('kp_autosave');
+  if (saved) {
+    try { ucitajData(JSON.parse(saved)); showToast('Učitano auto-snimanje'); } catch(e) {}
+  }
+  renderLista(); updateStats();
+
+  // Auto-save na promjenu meta polja
+  document.querySelectorAll('.meta-bar input').forEach(inp => {
+    inp.addEventListener('input', autoSave);
+  });
+});
+
+// ══════════════════════════════════════════
+//  ADD / DELETE ROW
+// ══════════════════════════════════════════
+function addRow(data) {
+  const id = idCnt++;
+  const r = {
+    id,
+    vrsta:  data?.vrsta  || '',
+    ploc:   data?.ploc   || '',
+    kPrec:  data?.kPrec  || '',
+    kDuz:   data?.kDuz   || '',
+    kSort:  data?.kSort  || '',
+    nap:    data?.nap    || '',
+    rPrec:  data?.rPrec  || '',
+    rDuz:   data?.rDuz   || '',
+    rSort:  data?.rSort  || '',
+    photos: data?.photos || [],
+    expanded: true,
+  };
+  rows.push(r);
+  renderLista(); updateStats(); autoSave();
+  // Scroll do novog
+  setTimeout(() => {
+    const el = document.getElementById('card-' + id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 80);
+}
+
+function deleteRow(id) {
+  if (!confirm('Obrisati ovo stablo?')) return;
+  rows = rows.filter(r => r.id !== id);
+  renderLista(); updateStats(); autoSave();
+  showToast('Stablo obrisano');
+}
+
+// ══════════════════════════════════════════
+//  RENDER LISTA
+// ══════════════════════════════════════════
+function renderLista() {
+  const lista = document.getElementById('stablo-lista');
+  const filterVrsta = document.getElementById('filter-vrsta').value;
+  const filterRaz   = document.getElementById('filter-razlika').value;
+
+  let filtered = rows.filter(r => {
+    if (filterVrsta && r.vrsta !== filterVrsta) return false;
+    if (filterRaz === 'diff' && !rowHasDiff(r)) return false;
+    if (filterRaz === 'ok'   &&  rowHasDiff(r)) return false;
+    return true;
+  });
+
+  document.getElementById('filter-count').textContent =
+    filtered.length !== rows.length ? `${filtered.length} / ${rows.length}` : `${rows.length} stabala`;
+
+  if (filtered.length === 0) {
+    lista.innerHTML = `<div class="empty-state">
+      <div class="ei">🌲</div>
+      <h3>${rows.length === 0 ? 'Nema stabala' : 'Nema rezultata'}</h3>
+      <p>${rows.length === 0 ? 'Dodaj prvo stablo klikom na zeleno <strong>+</strong> dugme.' : 'Promijeni filter za prikaz rezultata.'}</p>
+    </div>`;
+    return;
+  }
+
+  lista.innerHTML = '';
+  filtered.forEach((r, idx) => {
+    const card = makeCard(r, idx + 1);
+    lista.appendChild(card);
+  });
+}
+
+function makeCard(r, num) {
+  const hasDiff = rowHasDiff(r);
+  const dPrec = calcDiff(r.kPrec, r.rPrec);
+  const dDuz  = calcDiff(r.kDuz, r.rDuz);
+  const vK    = calcV(r.kPrec, r.kDuz);
+  const vR    = calcV(r.rPrec, r.rDuz);
+  const dV    = (vK !== null && vR !== null) ? (vK - vR) : null;
+  const dSort = (r.kSort && r.rSort && r.kSort !== r.rSort);
+
+  const card = document.createElement('div');
+  card.className = 'stablo-card' + (r.expanded ? ' expanded' : '') + (hasDiff ? ' has-diff' : (r.kPrec && r.rPrec ? ' ok' : ''));
+  card.id = 'card-' + r.id;
+
+  // HEADER
+  const hdr = document.createElement('div');
+  hdr.className = 'card-header';
+  hdr.innerHTML = `
+    <div class="card-header-left">
+      <div class="card-num">${num}</div>
+      <div>
+        <div class="card-title">${r.vrsta || '<span style="color:var(--g5);font-weight:400;font-style:italic">Vrsta nije odabrana</span>'}</div>
+        <div class="card-sub">
+          Pločica: ${r.ploc || '—'} &nbsp;·&nbsp;
+          K: ${r.kPrec ? r.kPrec+'cm / '+parseFloat(r.kDuz||0).toFixed(2)+'m' : '—'} &nbsp;·&nbsp;
+          R: ${r.rPrec ? r.rPrec+'cm / '+parseFloat(r.rDuz||0).toFixed(2)+'m' : '—'}
+          ${r.photos.length > 0 ? `&nbsp;·&nbsp; 📷${r.photos.length}` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="card-header-right">
+      <div class="diff-dot ${hasDiff ? 'bad' : (r.kPrec && r.rPrec ? 'ok' : '')}"></div>
+      <span class="card-chevron">▼</span>
+    </div>`;
+  hdr.addEventListener('click', () => toggleCard(r.id));
+  card.appendChild(hdr);
+
+  // BODY
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  // ── Kontrolni premjer ──
+  body.innerHTML += `<div class="data-section">
+    <span class="section-label sl-kontrolni">Kontrolni premjer</span>
+    <div class="input-row">
+      <div class="field-group">
+        <label>Vrsta drveta</label>
+        ${makeSelectHTML(VRSTE, r.vrsta, r.id, 'vrsta')}
+      </div>
+      <div class="field-group">
+        <label>Br. pločice</label>
+        <input type="text" value="${esc(r.ploc)}" data-id="${r.id}" data-field="ploc" inputmode="text" autocomplete="off">
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="field-group">
+        <label>Prečnik (cm)</label>
+        <input type="number" value="${esc(r.kPrec)}" data-id="${r.id}" data-field="kPrec" inputmode="decimal" min="0" step="1" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label>Dužina (m)</label>
+        <input type="number" value="${esc(r.kDuz)}" data-id="${r.id}" data-field="kDuz" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="input-row single">
+      <div class="field-group">
+        <label>Sortiment / Klasa</label>
+        ${makeSortSelectHTML(r.kSort, r.id, 'kSort')}
+      </div>
+    </div>
+    <div class="input-row single">
+      <div class="field-group">
+        <label>Napomena</label>
+        <input type="text" value="${esc(r.nap)}" data-id="${r.id}" data-field="nap" placeholder="Opcionalno..." autocomplete="off">
+      </div>
+    </div>
+  </div>`;
+
+  // ── Redovni premjer ──
+  body.innerHTML += `<div class="data-section">
+    <span class="section-label sl-redovni">Redovni premjer</span>
+    <div class="input-row">
+      <div class="field-group">
+        <label>Prečnik (cm)</label>
+        <input type="number" value="${esc(r.rPrec)}" data-id="${r.id}" data-field="rPrec" inputmode="decimal" min="0" step="1" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label>Dužina (m)</label>
+        <input type="number" value="${esc(r.rDuz)}" data-id="${r.id}" data-field="rDuz" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="input-row single">
+      <div class="field-group">
+        <label>Sortiment / Klasa</label>
+        ${makeSortSelectHTML(r.rSort, r.id, 'rSort')}
+      </div>
+    </div>
+  </div>`;
+
+  // ── Razlike ──
+  const dvStr = dV !== null ? ((dV >= 0 ? '+' : '') + dV.toFixed(2)) : '—';
+  body.innerHTML += `<div class="data-section">
+    <span class="section-label sl-razlike">Razlike</span>
+    <div class="diff-row" id="diffs-${r.id}">
+      <div class="diff-box">
+        <div class="dl">Prečnik</div>
+        <div class="dv ${diffCls(dPrec)}">${formatDiff(dPrec)}</div>
+      </div>
+      <div class="diff-box">
+        <div class="dl">Dužina</div>
+        <div class="dv ${diffCls(dDuz)}">${formatDiff(dDuz)}</div>
+      </div>
+      <div class="diff-box">
+        <div class="dl">Zap. Δ m³</div>
+        <div class="dv ${dV === null ? 'zero' : (Math.abs(dV) < 0.001 ? 'zero' : (dV > 0 ? 'pos' : 'neg'))}">${dvStr}</div>
+      </div>
+      <div class="diff-box">
+        <div class="dl">Klasa</div>
+        <div class="dv ${dSort ? 'diff-klas' : 'zero'}">${dSort ? r.kSort.substring(0,6)+'→'+r.rSort.substring(0,6) : '—'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Akcije ──
+  const actDiv = document.createElement('div');
+  actDiv.className = 'card-actions';
+  const hasFotos = r.photos && r.photos.length > 0;
+  actDiv.innerHTML = `
+    <button class="act-btn foto ${hasFotos ? 'has-photos' : ''}" onclick="otvoriPhotoModal(${r.id}, ${rows.findIndex(x=>x.id===r.id)+1})">
+      📷 ${hasFotos ? r.photos.length + ' foto' : 'Dodaj foto'}
+    </button>
+    <button class="act-btn del" onclick="deleteRow(${r.id})">🗑 Obriši</button>`;
+  body.appendChild(actDiv);
+
+  // Event listeners za inpute
+  body.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', onInputChange);
+    el.addEventListener('change', onInputChange);
+  });
+
+  card.appendChild(body);
+  return card;
+}
+
+function makeSelectHTML(options, val, id, field) {
+  const opts = options.map(v =>
+    `<option value="${v}"${v===val?' selected':''}>${v||'—'}</option>`
+  ).join('');
+  return `<select data-id="${id}" data-field="${field}"><option value="">— odaberi —</option>${opts}</select>`;
+}
+
+function makeSortSelectHTML(val, id, field) {
+  const opts = SORTIMENTI.map(v =>
+    `<option value="${v}"${v===val?' selected':''}>${v||'—'}</option>`
+  ).join('');
+  return `<select data-id="${id}" data-field="${field}"><option value="">— odaberi —</option>${opts}</select>`;
+}
+
+function esc(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function toggleCard(id) {
+  const r = rows.find(x => x.id === id);
+  if (r) { r.expanded = !r.expanded; renderLista(); }
+}
+
+// ══════════════════════════════════════════
+//  ON INPUT CHANGE
+// ══════════════════════════════════════════
+function onInputChange(e) {
+  const id    = parseInt(e.target.dataset.id);
+  const field = e.target.dataset.field;
+  const r = rows.find(x => x.id === id);
+  if (!r) return;
+  r[field] = e.target.value;
+  updateCardDiffs(r);
+  updateCardHeader(r);
+  updateStats();
+  autoSave();
+}
+
+function updateCardDiffs(r) {
+  const el = document.getElementById('diffs-' + r.id);
+  if (!el) return;
+  const dPrec = calcDiff(r.kPrec, r.rPrec);
+  const dDuz  = calcDiff(r.kDuz, r.rDuz);
+  const vK    = calcV(r.kPrec, r.kDuz);
+  const vR    = calcV(r.rPrec, r.rDuz);
+  const dV    = (vK !== null && vR !== null) ? (vK - vR) : null;
+  const dSort = r.kSort && r.rSort && r.kSort !== r.rSort;
+  const dvStr = dV !== null ? ((dV>=0?'+':'')+dV.toFixed(2)) : '—';
+
+  el.innerHTML = `
+    <div class="diff-box"><div class="dl">Prečnik</div><div class="dv ${diffCls(dPrec)}">${formatDiff(dPrec)}</div></div>
+    <div class="diff-box"><div class="dl">Dužina</div><div class="dv ${diffCls(dDuz)}">${formatDiff(dDuz)}</div></div>
+    <div class="diff-box"><div class="dl">Zap. Δ m³</div><div class="dv ${dV===null?'zero':(Math.abs(dV)<0.001?'zero':(dV>0?'pos':'neg'))}">${dvStr}</div></div>
+    <div class="diff-box"><div class="dl">Klasa</div><div class="dv ${dSort?'diff-klas':'zero'}">${dSort?r.kSort.substring(0,6)+'→'+r.rSort.substring(0,6):'—'}</div></div>`;
+
+  // Boja kartice
+  const card = document.getElementById('card-' + r.id);
+  if (card) {
+    card.className = 'stablo-card' + (r.expanded?' expanded':'') +
+      (rowHasDiff(r)?' has-diff':(r.kPrec&&r.rPrec?' ok':''));
+  }
+}
+
+function updateCardHeader(r) {
+  const card = document.getElementById('card-' + r.id);
+  if (!card) return;
+  const sub = card.querySelector('.card-sub');
+  if (sub) sub.innerHTML = `
+    Pločica: ${r.ploc||'—'} &nbsp;·&nbsp;
+    K: ${r.kPrec ? r.kPrec+'cm / '+parseFloat(r.kDuz||0).toFixed(2)+'m' : '—'} &nbsp;·&nbsp;
+    R: ${r.rPrec ? r.rPrec+'cm / '+parseFloat(r.rDuz||0).toFixed(2)+'m' : '—'}
+    ${r.photos&&r.photos.length>0?`&nbsp;·&nbsp; 📷${r.photos.length}`:''}`;
+  const title = card.querySelector('.card-title');
+  if (title) title.innerHTML = r.vrsta || '<span style="color:var(--g5);font-weight:400;font-style:italic">Vrsta nije odabrana</span>';
+  const dot = card.querySelector('.diff-dot');
+  if (dot) dot.className = 'diff-dot ' + (rowHasDiff(r)?'bad':(r.kPrec&&r.rPrec?'ok':''));
+}
+
+// ══════════════════════════════════════════
+//  STATISTIKE
+// ══════════════════════════════════════════
+function updateStats() {
+  let diffPrec=0, diffDuz=0, diffKlas=0, totalVK=0, totalVR=0;
+  rows.forEach(r => {
+    const dp = calcDiff(r.kPrec, r.rPrec);
+    const dd = calcDiff(r.kDuz, r.rDuz);
+    if (dp !== null && Math.abs(dp) > 0.001) diffPrec++;
+    if (dd !== null && Math.abs(dd) > 0.001) diffDuz++;
+    if (r.kSort && r.rSort && r.kSort !== r.rSort) diffKlas++;
+    const vk = calcV(r.kPrec, r.kDuz), vr = calcV(r.rPrec, r.rDuz);
+    if (vk !== null) totalVK += vk;
+    if (vr !== null) totalVR += vr;
+  });
+  const totalDiff = diffPrec + diffDuz + diffKlas;
+
+  document.getElementById('stat-ukupno').textContent = rows.length;
+  document.getElementById('stat-prec').textContent   = diffPrec;
+  document.getElementById('stat-duz').textContent    = diffDuz;
+  document.getElementById('stat-klas').textContent   = diffKlas;
+  document.getElementById('stat-vk').textContent     = totalVK.toFixed(2);
+  document.getElementById('stat-vr').textContent     = totalVR.toFixed(2);
+  const vd = totalVK - totalVR;
+  document.getElementById('stat-vd').textContent     = (vd >= 0 ? '+' : '') + vd.toFixed(2);
+
+  const badge = document.getElementById('diff-badge');
+  badge.textContent = totalDiff > 0 ? `⚠ ${totalDiff} razlika` : '✓ Bez razlika';
+  badge.className   = 'diff-chip ' + (totalDiff > 0 ? 'bad' : 'ok');
+
+  ['sc-prec','sc-duz','sc-klas'].forEach((id,i) => {
+    const v = [diffPrec, diffDuz, diffKlas][i];
+    document.getElementById(id).className = 'stat-pill ' + (v > 0 ? 'bad' : 'ok');
+  });
+  document.getElementById('sc-vd').className = 'stat-pill ' + (Math.abs(vd) > 0.001 ? 'bad' : 'ok');
+}
+
+// ══════════════════════════════════════════
+//  HELPER FUNKCIJE
+// ══════════════════════════════════════════
+function calcV(prec, duz) {
+  const p = parseFloat(prec), d = parseFloat(duz);
+  if (isNaN(p) || isNaN(d) || p <= 0 || d <= 0) return null;
+  return Math.PI * Math.pow(p / 200, 2) * d;
+}
+function calcDiff(a, b) {
+  const na = parseFloat(a), nb = parseFloat(b);
+  if (isNaN(na) || isNaN(nb)) return null;
+  return na - nb;
+}
+function formatDiff(d) {
+  if (d === null) return '—';
+  if (Math.abs(d) < 0.001) return '0';
+  return (d > 0 ? '+' : '') + d.toFixed(2);
+}
+function diffCls(d) {
+  if (d === null || Math.abs(d) < 0.001) return 'zero';
+  return d > 0 ? 'pos' : 'neg';
+}
+function rowHasDiff(r) {
+  const dp = calcDiff(r.kPrec, r.rPrec);
+  const dd = calcDiff(r.kDuz, r.rDuz);
+  return (dp !== null && Math.abs(dp) > 0.001) ||
+         (dd !== null && Math.abs(dd) > 0.001) ||
+         (r.kSort && r.rSort && r.kSort !== r.rSort);
+}
+
+// ══════════════════════════════════════════
+//  FOTO
+// ══════════════════════════════════════════
+function otvoriPhotoModal(rowId, rowNum) {
+  currentFotoId = rowId;
+  const r = rows.find(x => x.id === rowId);
+  document.getElementById('foto-modal-title').textContent = `📷 Stablo #${rowNum} – ${r?.vrsta || ''}`;
+  renderFotoGrid();
+  otvoriModal('modal-foto');
+}
+
+function renderFotoGrid() {
+  const grid  = document.getElementById('foto-grid');
+  const empty = document.getElementById('foto-empty');
+  const r = rows.find(x => x.id === currentFotoId);
+  if (!r) return;
+  grid.innerHTML = '';
+  if (!r.photos || r.photos.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  r.photos.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-item';
+    div.innerHTML = `<img src="${p.data}" alt="${p.name}">
+      <button class="photo-del" onclick="deleteFoto(${i})">✕</button>`;
+    grid.appendChild(div);
+  });
+}
+
+function handleFotoFiles(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  const r = rows.find(x => x.id === currentFotoId);
+  if (!r) return;
+  if (!r.photos) r.photos = [];
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      r.photos.push({ name: file.name, data: ev.target.result });
+      loaded++;
+      if (loaded === files.length) {
+        renderFotoGrid(); renderLista(); autoSave();
+        showToast(`Dodano ${files.length} foto(grafija)`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function deleteFoto(idx) {
+  const r = rows.find(x => x.id === currentFotoId);
+  if (!r) return;
+  r.photos.splice(idx, 1);
+  renderFotoGrid(); renderLista(); autoSave();
+  showToast('Fotografija obrisana');
+}
+
+// ══════════════════════════════════════════
+//  MODALI
+// ══════════════════════════════════════════
+function otvoriMeni()  { otvoriModal('modal-meni'); }
+function otvoriUvoz()  { otvoriModal('modal-uvoz'); }
+function otvoriModal(id) { document.getElementById(id).classList.add('open'); }
+function zatvoriModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ══════════════════════════════════════════
+//  UVOZ TEKST
+// ══════════════════════════════════════════
+function uvezi() {
+  const tekst = document.getElementById('uvoz-tekst').value.trim();
+  if (!tekst) return;
+  let dodano = 0;
+  tekst.split('\n').forEach(ln => {
+    ln = ln.trim(); if (!ln) return;
+    const sep = ln.includes('\t') ? '\t' : ';';
+    const d   = ln.split(sep).map(s => s.trim());
+    addRow({ vrsta:d[0]||'', ploc:d[1]||'', kPrec:d[2]||'', kDuz:d[3]||'',
+             kSort:d[4]||'', nap:d[5]||'', rPrec:d[6]||'', rDuz:d[7]||'', rSort:d[8]||'' });
+    dodano++;
+  });
+  zatvoriModal('modal-uvoz');
+  document.getElementById('uvoz-tekst').value = '';
+  showToast(`Uvezeno ${dodano} stabala`);
+}
+
+// ══════════════════════════════════════════
+//  SPREMI / UČITAJ
+// ══════════════════════════════════════════
+function getMeta() {
+  return {
+    odjel:     document.getElementById('meta-odjel').value,
+    datum:     document.getElementById('meta-datum').value,
+    kontrolor: document.getElementById('meta-kontrolor').value,
+    primka:    document.getElementById('meta-primka').value,
+    napomena:  document.getElementById('meta-napomena').value,
+  };
+}
+function setMeta(m) {
+  if (!m) return;
+  document.getElementById('meta-odjel').value     = m.odjel     || '';
+  document.getElementById('meta-datum').value     = m.datum     || '';
+  document.getElementById('meta-kontrolor').value = m.kontrolor || '';
+  document.getElementById('meta-primka').value    = m.primka    || '';
+  document.getElementById('meta-napomena').value  = m.napomena  || '';
+}
+
+function spremi() {
+  const data = { meta: getMeta(), rows: rows.map(r=>({...r})), idCnt };
+  localStorage.setItem('kp_autosave', JSON.stringify(data));
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `kontrola_${getMeta().primka||'primka'}_${getMeta().datum||'datum'}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('Sačuvano i preuzeto');
+}
+
+function ucitajSpremljeno() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { ucitajData(JSON.parse(ev.target.result)); showToast('Učitano: '+file.name); }
+      catch(err) { alert('Greška: '+err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function ucitajData(data) {
+  if (data.meta) setMeta(data.meta);
+  rows  = (data.rows||[]).map(r => ({...r, photos: r.photos||[], expanded: false}));
+  idCnt = data.idCnt || (rows.length ? Math.max(...rows.map(r=>r.id))+1 : 0);
+  renderLista(); updateStats();
+}
+
+function autoSave() {
+  try { localStorage.setItem('kp_autosave', JSON.stringify({meta:getMeta(), rows:rows.map(r=>({...r})), idCnt})); } catch(e) {}
+}
+
+function novaLista() {
+  if (rows.length > 0 && !confirm('Obrisati sve i početi novu listu?')) return;
+  rows = []; idCnt = 0;
+  setMeta({odjel:'', datum:new Date().toISOString().split('T')[0], kontrolor:'', primka:'', napomena:''});
+  renderLista(); updateStats(); showToast('Nova lista');
+}
+
+// ══════════════════════════════════════════
+//  EXPORT CSV
+// ══════════════════════════════════════════
+function exportCSV() {
+  const meta = getMeta();
+  let csv = '\uFEFF';
+  csv += `Kontrola primke/sječe\nOdjel;${meta.odjel}\nDatum;${meta.datum}\nKontrolol;${meta.kontrolor}\nBr. primke;${meta.primka}\n\n`;
+  csv += 'R.br.;Vrsta;Plocica;K.Prec(cm);K.Duz(m);K.Sort;Nap;R.Prec(cm);R.Duz(m);R.Sort;Delta.Prec;Delta.Duz;Delta.V(m3);Delta.Sort\n';
+  rows.forEach((r,i) => {
+    const vK=calcV(r.kPrec,r.kDuz), vR=calcV(r.rPrec,r.rDuz);
+    const dV = (vK!==null&&vR!==null)?((vK-vR>=0?'+':'')+(vK-vR).toFixed(2)):'—';
+    csv += [i+1,r.vrsta,r.ploc,r.kPrec,r.kDuz,r.kSort,r.nap,r.rPrec,r.rDuz,r.rSort,
+            formatDiff(calcDiff(r.kPrec,r.rPrec)),formatDiff(calcDiff(r.kDuz,r.rDuz)),dV,
+            r.kSort!==r.rSort&&r.kSort&&r.rSort?r.kSort+'→'+r.rSort:''
+           ].join(';') + '\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = `kontrola_${getMeta().datum||'export'}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('CSV izvezen');
+}
+
+// ══════════════════════════════════════════
+//  EXPORT PDF
+// ══════════════════════════════════════════
+async function exportPDF() {
+  if (!window.jspdf) {
+    try {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    } catch(e) { alert('Nije moguće učitati PDF biblioteku. Provjeri internet konekciju.'); return; }
+  }
+
+  document.getElementById('pdf-overlay').classList.add('open');
+  await new Promise(r => setTimeout(r, 120));
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const meta = getMeta();
+    const W = 210, H = 297, mg = 14;
+    const contentW = W - mg * 2;
+
+    const gd = [26, 58, 42], gm = [45, 106, 79], gl = [82, 183, 136];
+    const gp = [216, 243, 220], g1 = [242, 242, 247], g5 = [99, 99, 102];
+
+    // ── ZAGLAVLJE ──
+    doc.setFillColor(...gd);
+    doc.rect(0, 0, W, 24, 'F');
+    doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text('Kontrola Primke / Sječe', mg, 12);
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(160,210,180);
+    doc.text('Sumsko gazdinstvo  ·  Izvjestaj kontrole', mg, 18.5);
+    doc.setFontSize(9); doc.setTextColor(200,230,210);
+    doc.text(`Generirano: ${new Date().toLocaleString('bs')}`, W-mg, 18.5, {align:'right'});
+
+    // ── META ──
+    doc.setFillColor(...gm);
+    doc.rect(0, 24, W, 22, 'F');
+    const metaData = [
+      ['Odjel:', meta.odjel||'—', 'Datum:', meta.datum||'—'],
+      ['Kontrolor:', meta.kontrolor||'—', 'Br. primke:', meta.primka||'—'],
+    ];
+    let my = 31;
+    metaData.forEach(row => {
+      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(180,220,190);
+      doc.text(row[0], mg, my);
+      doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+      doc.text(row[1], mg+22, my);
+      doc.setFont('helvetica','bold'); doc.setTextColor(180,220,190);
+      doc.text(row[2], W/2, my);
+      doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+      doc.text(row[3], W/2+20, my);
+      my += 7;
+    });
+    if (meta.napomena) {
+      doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(180,220,190);
+      doc.text('Napomena:', mg, 45.5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+      doc.text(meta.napomena.substring(0,80), mg+20, 45.5);
+    }
+
+    // ── STATISTIKE ──
+    let y = 50;
+    doc.setFillColor(...g1);
+    doc.rect(0, y, W, 18, 'F');
+    const stats = [
+      ['Stabala', rows.length],
+      ['Δ Prečnik', document.getElementById('stat-prec').textContent],
+      ['Δ Dužina', document.getElementById('stat-duz').textContent],
+      ['Δ Klasa', document.getElementById('stat-klas').textContent],
+      ['Zap. K (m³)', document.getElementById('stat-vk').textContent],
+      ['Zap. R (m³)', document.getElementById('stat-vr').textContent],
+      ['Δ Zap. (m³)', document.getElementById('stat-vd').textContent],
+    ];
+    const sw = contentW / stats.length;
+    stats.forEach(([label,val],i) => {
+      const cx = mg + i*sw + sw/2;
+      doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...g5);
+      doc.text(label, cx, y+6, {align:'center'});
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      const sv = String(val);
+      const hasRed = (i===1||i===2||i===3) && sv !== '0';
+      const hasGr  = (i===4||i===5) && parseFloat(sv)>0;
+      doc.setTextColor(hasRed ? 192 : (hasGr ? 45 : 30), hasRed ? 57 : (hasGr?106:30), hasRed ? 43 : 30);
+      doc.text(sv, cx, y+14, {align:'center'});
+    });
+    y += 22;
+
+    // ── TABELA ──
+    const cols = [
+      {h:'#',       w:8,  al:'center'},
+      {h:'Vrsta',   w:28, al:'left'},
+      {h:'Plocica', w:18, al:'center'},
+      {h:'K.Prec\n(cm)', w:16, al:'center'},
+      {h:'K.Duz\n(m)',   w:16, al:'center'},
+      {h:'K.Sort',  w:28, al:'center'},
+      {h:'R.Prec\n(cm)', w:16, al:'center'},
+      {h:'R.Duz\n(m)',   w:16, al:'center'},
+      {h:'R.Sort',  w:28, al:'center'},
+      {h:'ΔPrec',   w:13, al:'center'},
+      {h:'ΔDuz',    w:13, al:'center'},
+      {h:'ΔV m³',   w:15, al:'center'},
+      {h:'ΔKlasa',  w:20, al:'center'},
+      {h:'📷',       w:8,  al:'center'},
+    ];
+    const tW = cols.reduce((a,c)=>a+c.w,0);
+    const sc = contentW / tW;
+    const RH = 7;
+
+    // Zaglavlje tabele
+    doc.setFillColor(...gd);
+    doc.rect(mg, y, contentW, RH+1, 'F');
+    doc.setFontSize(6.5); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    let cx = mg;
+    cols.forEach(col => {
+      const cw = col.w * sc;
+      const lines = col.h.split('\n');
+      lines.forEach((line, li) => {
+        doc.text(line, cx + cw/2, y + 3 + li*3.5, {align:'center'});
+      });
+      cx += cw;
+    });
+    y += RH+1;
+
+    // Redovi
+    rows.forEach((r, idx) => {
+      if (y + RH > H - 18) {
+        doc.addPage(); y = 16;
+        // Re-draw header
+        doc.setFillColor(...gd);
+        doc.rect(mg, y, contentW, RH+1, 'F');
+        doc.setFontSize(6.5); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        let hcx = mg;
+        cols.forEach(col => {
+          const cw = col.w*sc;
+          doc.text(col.h.split('\n')[0], hcx+cw/2, y+4.5, {align:'center'});
+          hcx+=cw;
+        });
+        y += RH+1;
+      }
+
+      const hasDiff = rowHasDiff(r);
+      doc.setFillColor(hasDiff ? 255 : (idx%2===0?248:255), hasDiff ? 249 : (idx%2===0?252:255), hasDiff ? 248 : (idx%2===0?248:255));
+      doc.rect(mg, y, contentW, RH, 'F');
+
+      const dPrec = calcDiff(r.kPrec, r.rPrec);
+      const dDuz  = calcDiff(r.kDuz, r.rDuz);
+      const vK = calcV(r.kPrec, r.kDuz), vR = calcV(r.rPrec, r.rDuz);
+      const dV = (vK!==null&&vR!==null)?(vK-vR):null;
+      const dSort = r.kSort&&r.rSort&&r.kSort!==r.rSort ? r.kSort.substring(0,5)+'→'+r.rSort.substring(0,5) : '';
+      const dvStr = dV!==null ? ((dV>=0?'+':'')+dV.toFixed(2)) : '—';
+      const kDuzFmt = r.kDuz ? parseFloat(r.kDuz).toFixed(2) : '';
+      const rDuzFmt = r.rDuz ? parseFloat(r.rDuz).toFixed(2) : '';
+
+      const vals = [
+        String(idx+1), (r.vrsta||'').substring(0,14), (r.ploc||'').substring(0,10),
+        r.kPrec||'', kDuzFmt, (r.kSort||'').substring(0,12),
+        r.rPrec||'', rDuzFmt, (r.rSort||'').substring(0,12),
+        formatDiff(dPrec), formatDiff(dDuz), dvStr, dSort.substring(0,10),
+        r.photos&&r.photos.length>0 ? String(r.photos.length) : '',
+      ];
+
+      cx = mg;
+      cols.forEach((col,ci) => {
+        const cw = col.w*sc;
+        doc.setFontSize(6); doc.setFont('helvetica','normal');
+        // Boja za razlike
+        if (ci===9||ci===10||ci===11) {
+          const dv = ci===9?dPrec:ci===10?dDuz:dV;
+          if (dv!==null&&Math.abs(dv)>0.001) doc.setTextColor(dv>0?192:21,dv>0?57:101,dv>0?43:192);
+          else doc.setTextColor(180,180,180);
+        } else if (ci===12&&dSort) { doc.setTextColor(192,57,43); }
+        else if (ci===13&&r.photos&&r.photos.length>0) { doc.setTextColor(21,101,192); doc.setFont('helvetica','bold'); }
+        else { doc.setTextColor(30,30,30); }
+        const tx = col.al==='left' ? cx+1.5 : cx+cw/2;
+        doc.text(String(vals[ci]), tx, y+RH-1.8, {align:col.al==='left'?'left':'center'});
+        cx += cw;
+      });
+
+      doc.setDrawColor(225,225,225); doc.setLineWidth(0.15);
+      doc.line(mg, y+RH, mg+contentW, y+RH);
+      y += RH;
+    });
+
+    // ── FOTOGRAFIJE ──
+    const photoRows = rows.filter(r=>r.photos&&r.photos.length>0);
+    if (photoRows.length > 0) {
+      doc.addPage();
+      y = 16;
+      doc.setFillColor(...gd);
+      doc.rect(0, 0, W, 14, 'F');
+      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+      doc.text('Fotografije stabala', mg, 10);
+
+      for (const r of photoRows) {
+        const rIdx = rows.findIndex(x=>x.id===r.id);
+        if (y + 10 > H - 16) { doc.addPage(); y = 16; }
+
+        doc.setFillColor(...gp);
+        doc.rect(mg, y, contentW, 8, 'F');
+        doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...gd);
+        doc.text(`Stablo #${rIdx+1}  –  ${r.vrsta||'?'}  |  Plocica: ${r.ploc||'—'}  |  Prec: ${r.kPrec||'—'}cm  Duz: ${r.kDuz?parseFloat(r.kDuz).toFixed(2)+'m':'—'}`, mg+3, y+5.5);
+        y += 10;
+
+        const PW = 56, PH = 42, GAP = 5;
+        let px = mg;
+        for (let pi=0; pi<r.photos.length; pi++) {
+          if (px + PW > W - mg) { px = mg; y += PH + GAP; }
+          if (y + PH > H - 16) { doc.addPage(); y = 16; px = mg; }
+          try {
+            doc.addImage(r.photos[pi].data, 'JPEG', px, y, PW, PH, undefined, 'MEDIUM');
+            doc.setDrawColor(180,200,180); doc.setLineWidth(0.3); doc.rect(px, y, PW, PH);
+            doc.setFontSize(5.5); doc.setTextColor(100,100,100); doc.setFont('helvetica','normal');
+            doc.text(r.photos[pi].name.substring(0,22), px, y+PH+3.5);
+          } catch(e) {}
+          px += PW + GAP;
+        }
+        y += PH + GAP + 10;
+      }
+    }
+
+    // ── FOOTER ──
+    const pCount = doc.getNumberOfPages();
+    for (let i=1; i<=pCount; i++) {
+      doc.setPage(i);
+      doc.setFillColor(...g1); doc.rect(0, H-10, W, 10, 'F');
+      doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(140,140,140);
+      doc.text(`Kontrola Primke / Sječe  ·  ${meta.odjel||''}  ·  ${meta.datum||''}  ·  Kontrolor: ${meta.kontrolor||'—'}`, mg, H-4);
+      doc.text(`${i} / ${pCount}`, W-mg, H-4, {align:'right'});
+    }
+
+    doc.save(`kontrola_${meta.datum||'izvjestaj'}.pdf`);
+    showToast('PDF sačuvan');
+  } catch(err) {
+    console.error(err); alert('Greška pri generiranju PDF-a: '+err.message);
+  } finally {
+    document.getElementById('pdf-overlay').classList.remove('open');
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
