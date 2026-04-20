@@ -1,6 +1,6 @@
 {
-  "name": "Kontrola Primke / Sječe",
-  "short_name": "Kontrola",
+  "name": "Kontrola sječe",
+  "short_name": "Kont. sječe",
   "description": "Kontrola primke i sječe šume – radi offline",
   "start_url": "./",
   "display": "standalone",
@@ -10,6 +10,12 @@
   "lang": "bs",
   "categories": ["productivity", "utilities"],
   "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
