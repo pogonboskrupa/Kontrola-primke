@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#1a3a2a">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Kontrola Primke</title>
+<title>Kontrola sječe</title>
 <style>
 :root {
   --gd: #1a3a2a;
@@ -430,7 +430,7 @@ body {
     <div class="header-logo">
       <div class="logo-icon">🌲</div>
       <div class="logo-text">
-        <h1>Kontrola Primke</h1>
+        <h1>Kontrola sječe</h1>
         <p>ŠPD UNSKO SANSKE ŠUME &nbsp;·&nbsp; offline</p>
       </div>
     </div>
@@ -515,13 +515,13 @@ body {
 <div class="stablo-lista" id="stablo-lista">
   <div class="empty-state">
     <div class="ei">🌲</div>
-    <h3>Nema stabala</h3>
-    <p>Dodaj prvo stablo klikom na zeleno <strong>+</strong> dugme u donjem desnom uglu.</p>
+    <h3>Nema zapisa</h3>
+    <p>Tapni zeleno <strong>+</strong> dugme da dodaš sortiment.</p>
   </div>
 </div>
 
 <!-- ══ FAB ══ -->
-<button class="fab" onclick="addRow()" title="Dodaj stablo">+</button>
+<button class="fab" onclick="addRow()" title="Dodaj sortiment">+</button>
 
 <!-- ══ TOAST ══ -->
 <div class="toast" id="toast"></div>
@@ -563,14 +563,14 @@ body {
       <div class="menu-icon mi-blue">📋</div>
       <div>
         <div>Uvezi tekst / CSV</div>
-        <div style="font-size:12px;color:var(--g5);">Zalijepi podatke iz clipboard-a</div>
+        <div style="font-size:12px;color:var(--g5);">Zalijepi podatke iz međuspremnika</div>
       </div>
     </div>
     <div class="menu-item" onclick="novaLista();zatvoriModal('modal-meni')" style="color:var(--red)">
       <div class="menu-icon mi-red">🗑</div>
       <div>
         <div>Nova lista (obriši sve)</div>
-        <div style="font-size:12px;color:var(--g5);">Briše sva stabla i resetuje formu</div>
+        <div style="font-size:12px;color:var(--g5);">Briše sve zapise i resetira formu</div>
       </div>
     </div>
   </div>
@@ -585,7 +585,7 @@ body {
       Format (separator <strong>;</strong> ili TAB):<br>
       <code style="font-size:11px;background:var(--g1);padding:3px 6px;border-radius:4px;">Bukva;4841;37;2.20;Trupac I;napomena;37;2.20;Trupac I</code>
     </p>
-    <textarea id="uvoz-tekst" placeholder="Zalijepi podatke ovdje..."></textarea>
+    <textarea id="uvoz-tekst" placeholder="Zalijepi podatke ovdje (iz Excela ili drugog izvora)..."></textarea>
     <div class="modal-btns">
       <button class="btn btn-cancel" onclick="zatvoriModal('modal-uvoz')">Odustani</button>
       <button class="btn btn-confirm" onclick="uvezi()">Uvezi</button>
@@ -656,7 +656,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Autosave
   const saved = localStorage.getItem('kp_autosave');
   if (saved) {
-    try { ucitajData(JSON.parse(saved)); showToast('Učitano auto-snimanje'); } catch(e) {}
+    try { ucitajData(JSON.parse(saved)); showToast('Učitano automatsko snimanje'); } catch(e) {}
   }
   renderLista(); updateStats(); updateMetaBarVisibility();
 
@@ -716,10 +716,10 @@ function addRow(data) {
 }
 
 function deleteRow(id) {
-  if (!confirm('Obrisati ovo stablo?')) return;
+  if (!confirm('Obrisati ovaj zapis?')) return;
   rows = rows.filter(r => r.id !== id);
   renderLista(); updateStats(); autoSave(); updateMetaBarVisibility();
-  showToast('Stablo obrisano');
+  showToast('Zapis obrisan');
 }
 
 // ══════════════════════════════════════════
@@ -738,13 +738,13 @@ function renderLista() {
   });
 
   document.getElementById('filter-count').textContent =
-    filtered.length !== rows.length ? `${filtered.length} / ${rows.length}` : `${rows.length} stabala`;
+    filtered.length !== rows.length ? `${filtered.length} / ${rows.length}` : `${rows.length} zapisa`;
 
   if (filtered.length === 0) {
     lista.innerHTML = `<div class="empty-state">
       <div class="ei">🌲</div>
-      <h3>${rows.length === 0 ? 'Nema stabala' : 'Nema rezultata'}</h3>
-      <p>${rows.length === 0 ? 'Dodaj prvo stablo klikom na zeleno <strong>+</strong> dugme.' : 'Promijeni filter za prikaz rezultata.'}</p>
+      <h3>${rows.length === 0 ? 'Nema zapisa' : 'Nema rezultata'}</h3>
+      <p>${rows.length === 0 ? 'Tapni zeleno <strong>+</strong> dugme da dodaš sortiment.' : 'Promijeni filter za prikaz rezultata.'}</p>
     </div>`;
     return;
   }
@@ -1048,7 +1048,7 @@ function rowHasDiff(r) {
 function otvoriPhotoModal(rowId, rowNum) {
   currentFotoId = rowId;
   const r = rows.find(x => x.id === rowId);
-  document.getElementById('foto-modal-title').textContent = `📷 Stablo #${rowNum} – ${r?.vrsta || ''}`;
+  document.getElementById('foto-modal-title').textContent = `📷 Sortiment #${rowNum} – ${r?.vrsta || ''}`;
   renderFotoGrid();
   otvoriModal('modal-foto');
 }
@@ -1125,7 +1125,7 @@ function uvezi() {
   });
   zatvoriModal('modal-uvoz');
   document.getElementById('uvoz-tekst').value = '';
-  showToast(`Uvezeno ${dodano} stabala`);
+  showToast(`Uvezeno ${dodano} zapisa`);
 }
 
 // ══════════════════════════════════════════
@@ -1168,7 +1168,7 @@ function ucitajSpremljeno() {
     const reader = new FileReader();
     reader.onload = ev => {
       try { ucitajData(JSON.parse(ev.target.result)); showToast('Učitano: '+file.name); }
-      catch(err) { alert('Greška: '+err.message); }
+      catch(err) { alert('Greška pri učitavanju: '+err.message); }
     };
     reader.readAsText(file);
   };
@@ -1199,8 +1199,8 @@ function novaLista() {
 function exportCSV() {
   const meta = getMeta();
   let csv = '\uFEFF';
-  csv += `Kontrola primke/sječe\nOdjel;${meta.odjel}\nDatum;${meta.datum}\nKontrolol;${meta.kontrolor}\nPrimač;${meta.primka}\n\n`;
-  csv += 'R.br.;Vrsta;Plocica;K.Prec(cm);K.Duz(m);K.Sort;Nap;R.Prec(cm);R.Duz(m);R.Sort;Delta.Prec;Delta.Duz;Delta.V(m3);Delta.Sort\n';
+  csv += `Kontrola sječe šumskih sortimenata\nOdjel;${meta.odjel}\nDatum;${meta.datum}\nKontrolante;${meta.kontrolor}\nPrimač;${meta.primka}\n\n`;
+  csv += 'R.br.;Vrsta;Pločica;K.Prečnik(cm);K.Dužina(m);K.Sortiment;Napomena;R.Prečnik(cm);R.Dužina(m);R.Sortiment;Δ.Prečnik;Δ.Dužina;Δ.Zap(m3);Δ.Sortiment\n';
   rows.forEach((r,i) => {
     const vK=calcV(r.kPrec,r.kDuz), vR=calcV(r.rPrec,r.rDuz);
     const dV = (vK!==null&&vR!==null)?((vK-vR>=0?'+':'')+(vK-vR).toFixed(2)):'—';
@@ -1243,9 +1243,9 @@ async function exportPDF() {
     doc.setFillColor(...gd);
     doc.rect(0, 0, W, 24, 'F');
     doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-    doc.text('Kontrola Primke / Sječe', mg, 12);
+    doc.text('Kontrola sječe šumskih sortimenata', mg, 12);
     doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(160,210,180);
-    doc.text('Sumsko gazdinstvo  ·  Izvjestaj kontrole', mg, 18.5);
+    doc.text('ŠPD Unsko-sanske šume  ·  Izvještaj kontrole', mg, 18.5);
     doc.setFontSize(9); doc.setTextColor(200,230,210);
     doc.text(`Generirano: ${new Date().toLocaleString('bs')}`, W-mg, 18.5, {align:'right'});
 
@@ -1306,17 +1306,17 @@ async function exportPDF() {
     const cols = [
       {h:'#',       w:8,  al:'center'},
       {h:'Vrsta',   w:28, al:'left'},
-      {h:'Plocica', w:18, al:'center'},
-      {h:'K.Prec\n(cm)', w:16, al:'center'},
-      {h:'K.Duz\n(m)',   w:16, al:'center'},
-      {h:'K.Sort',  w:28, al:'center'},
-      {h:'R.Prec\n(cm)', w:16, al:'center'},
-      {h:'R.Duz\n(m)',   w:16, al:'center'},
-      {h:'R.Sort',  w:28, al:'center'},
-      {h:'ΔPrec',   w:13, al:'center'},
-      {h:'ΔDuz',    w:13, al:'center'},
-      {h:'ΔV m³',   w:15, al:'center'},
-      {h:'ΔKlasa',  w:20, al:'center'},
+      {h:'Pločica', w:18, al:'center'},
+      {h:'K.Prečnik\n(cm)', w:16, al:'center'},
+      {h:'K.Dužina\n(m)',   w:16, al:'center'},
+      {h:'K.Sortiment',     w:28, al:'center'},
+      {h:'R.Prečnik\n(cm)', w:16, al:'center'},
+      {h:'R.Dužina\n(m)',   w:16, al:'center'},
+      {h:'R.Sortiment',     w:28, al:'center'},
+      {h:'Δ Prečnik', w:13, al:'center'},
+      {h:'Δ Dužina',  w:13, al:'center'},
+      {h:'Δ Zap. m³', w:15, al:'center'},
+      {h:'Δ Klasa',   w:20, al:'center'},
       {h:'📷',       w:8,  al:'center'},
     ];
     const tW = cols.reduce((a,c)=>a+c.w,0);
@@ -1406,7 +1406,7 @@ async function exportPDF() {
       doc.setFillColor(...gd);
       doc.rect(0, 0, W, 14, 'F');
       doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-      doc.text('Fotografije stabala', mg, 10);
+      doc.text('Fotografije sortimenata', mg, 10);
 
       for (const r of photoRows) {
         const rIdx = rows.findIndex(x=>x.id===r.id);
@@ -1415,7 +1415,7 @@ async function exportPDF() {
         doc.setFillColor(...gp);
         doc.rect(mg, y, contentW, 8, 'F');
         doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...gd);
-        doc.text(`Stablo #${rIdx+1}  –  ${r.vrsta||'?'}  |  Plocica: ${r.ploc||'—'}  |  Prec: ${r.kPrec||'—'}cm  Duz: ${r.kDuz?parseFloat(r.kDuz).toFixed(2)+'m':'—'}`, mg+3, y+5.5);
+        doc.text(`Sortiment #${rIdx+1}  –  ${r.vrsta||'?'}  |  Pločica: ${r.ploc||'—'}  |  Prečnik: ${r.kPrec||'—'} cm  |  Dužina: ${r.kDuz?parseFloat(r.kDuz).toFixed(2)+' m':'—'}`, mg+3, y+5.5);
         y += 10;
 
         const PW = 56, PH = 42, GAP = 5;
@@ -1441,11 +1441,11 @@ async function exportPDF() {
       doc.setPage(i);
       doc.setFillColor(...g1); doc.rect(0, H-10, W, 10, 'F');
       doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(140,140,140);
-      doc.text(`Kontrola Primke / Sječe  ·  ${meta.odjel||''}  ·  ${meta.datum||''}  ·  Kontrolor: ${meta.kontrolor||'—'}`, mg, H-4);
+      doc.text(`Kontrola sječe  ·  ŠPD Unsko-sanske šume  ·  Odjel: ${meta.odjel||'—'}  ·  Datum: ${meta.datum||'—'}  ·  Kontrolant: ${meta.kontrolor||'—'}`, mg, H-4);
       doc.text(`${i} / ${pCount}`, W-mg, H-4, {align:'right'});
     }
 
-    doc.save(`kontrola_${meta.datum||'izvjestaj'}.pdf`);
+    doc.save(`kontrola_sječe_${meta.datum||'izvještaj'}.pdf`);
     showToast('PDF sačuvan');
   } catch(err) {
     console.error(err); alert('Greška pri generiranju PDF-a: '+err.message);
