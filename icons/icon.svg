@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#1a3a2a"/>
+  <!-- Tree crown – three stacked triangles -->
+  <polygon points="256,58 356,178 156,178" fill="#52b788"/>
+  <polygon points="256,105 340,205 172,205" fill="#52b788"/>
+  <polygon points="256,148 320,228 192,228" fill="#52b788"/>
+  <!-- Trunk -->
+  <rect x="238" y="226" width="36" height="52" rx="8" fill="#52b788"/>
+  <!-- "Kontrola" line 1 -->
+  <text x="256" y="332"
+    font-family="'Arial Black',Arial,Helvetica,sans-serif"
+    font-size="66" font-weight="900"
+    fill="#ffffff" text-anchor="middle" letter-spacing="-1">Kontrola</text>
+  <!-- "sječe" line 2 – accent colour -->
+  <text x="256" y="410"
+    font-family="'Arial Black',Arial,Helvetica,sans-serif"
+    font-size="72" font-weight="900"
+    fill="#52b788" text-anchor="middle" letter-spacing="-1">sječe</text>
+</svg>
