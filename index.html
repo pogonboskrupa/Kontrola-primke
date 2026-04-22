@@ -466,9 +466,78 @@ body {
   .diff-row { gap: 4px; }
   .diff-box { padding: 4px 6px; }
 }
+
+/* ══ HOME SCREEN ══ */
+.home-header {
+  background: var(--gd); color: white;
+  padding: 16px 16px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.home-lista {
+  padding: 14px 16px;
+  padding-bottom: calc(90px + var(--safe-bottom));
+}
+.odjel-group { margin-bottom: 24px; }
+.odjel-label {
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--gm);
+  padding: 0 2px 6px; margin-bottom: 8px;
+  border-bottom: 2px solid var(--gp);
+}
+.kard {
+  background: white; border-radius: var(--r);
+  box-shadow: var(--sh); border-left: 4px solid var(--g3);
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.kard:active { opacity: 0.82; }
+.kard.kard-diff { border-left-color: var(--red); }
+.kard.kard-ok   { border-left-color: var(--gl); }
+.kard-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px; }
+.kard-info { flex: 1; min-width: 0; }
+.kard-title { font-size: 15px; font-weight: 700; color: var(--g9); }
+.kard-primac { color: var(--gm); }
+.kard-sub { font-size: 12px; color: var(--g5); margin-top: 3px; }
+.kard-side { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 10px; }
+.kard-arrow { font-size: 26px; color: var(--g3); font-weight: 300; line-height: 1; }
+.kard-del-btn {
+  background: none; border: none; color: var(--g3); font-size: 18px;
+  cursor: pointer; padding: 4px 6px; border-radius: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.kard-del-btn:active { color: var(--red); background: var(--red-p); }
+.back-btn {
+  background: rgba(255,255,255,0.15); border: none; color: white;
+  border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.back-btn:active { background: rgba(255,255,255,0.3); }
 </style>
 </head>
 <body>
+
+<!-- ══ HOME SCREEN ══ -->
+<div id="screen-home">
+  <div class="home-header">
+    <div class="header-logo">
+      <div class="logo-icon">🌲</div>
+      <div class="logo-text">
+        <h1>Kontrola sječe</h1>
+        <p>ŠPD UNSKO SANSKE ŠUME &nbsp;·&nbsp; offline</p>
+      </div>
+    </div>
+  </div>
+  <div class="home-lista" id="home-lista"></div>
+  <button class="fab" onclick="novaKontrola()" title="Nova kontrola">+</button>
+</div>
+
+<!-- ══ SCREEN KONTROLA ══ -->
+<div id="screen-kontrola" style="display:none">
 
 <!-- ══ HEADER ══ -->
 <div class="header">
@@ -481,6 +550,7 @@ body {
       </div>
     </div>
     <div class="header-btns">
+      <button class="back-btn" onclick="backToHome()">← Lista</button>
       <button class="meta-toggle-btn" id="meta-toggle-btn" onclick="toggleMetaBar()" title="Prikaži/sakrij podatke o kontroli">✎ Podaci</button>
       <button class="icon-btn" onclick="otvoriMeni()" title="Meni">⋮</button>
     </div>
@@ -580,6 +650,7 @@ body {
 
 <!-- ══ FAB ══ -->
 <button class="fab" onclick="addRow()" title="Dodaj sortiment">+</button>
+</div><!-- /screen-kontrola -->
 
 <!-- ══ TOAST ══ -->
 <div class="toast" id="toast"></div>
@@ -624,11 +695,11 @@ body {
         <div style="font-size:12px;color:var(--g5);">Zalijepi podatke iz međuspremnika</div>
       </div>
     </div>
-    <div class="menu-item" onclick="novaLista();zatvoriModal('modal-meni')" style="color:var(--red)">
-      <div class="menu-icon mi-red">🗑</div>
+    <div class="menu-item" onclick="zatvoriModal('modal-meni');backToHome()">
+      <div class="menu-icon mi-green">🏠</div>
       <div>
-        <div>Nova lista (obriši sve)</div>
-        <div style="font-size:12px;color:var(--g5);">Briše sve zapise i resetira formu</div>
+        <div>Nazad na listu</div>
+        <div style="font-size:12px;color:var(--g5);">Sačuva i vrati se na početak</div>
       </div>
     </div>
   </div>
@@ -697,13 +768,13 @@ const SORTIMENTI = [
 let rows = [];
 let idCnt = 0;
 let currentFotoId = null;
+let kontrole = [];
+let activeId  = null;
 
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('meta-datum').value = new Date().toISOString().split('T')[0];
-
   // Popuni filter
   const fv = document.getElementById('filter-vrsta');
   VRSTE.forEach(v => {
@@ -711,12 +782,9 @@ window.addEventListener('DOMContentLoaded', () => {
     o.value = v; o.textContent = v; fv.appendChild(o);
   });
 
-  // Autosave
-  const saved = localStorage.getItem('kp_autosave');
-  if (saved) {
-    try { ucitajData(JSON.parse(saved)); showToast('Učitano automatsko snimanje'); } catch(e) {}
-  }
-  renderLista(); updateStats(); updateMetaBarVisibility();
+  loadAll();
+  renderHome();
+  showScreen('home');
 
   // Auto-save na promjenu meta polja
   document.querySelectorAll('.meta-bar input').forEach(inp => {
@@ -1209,14 +1277,14 @@ function setMeta(m) {
 }
 
 function spremi() {
+  saveActive();
   const data = { meta: getMeta(), rows: rows.map(r=>({...r})), idCnt };
-  localStorage.setItem('kp_autosave', JSON.stringify(data));
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `kontrola_${getMeta().primka||'primka'}_${getMeta().datum||'datum'}.json`;
   a.click(); URL.revokeObjectURL(a.href);
-  showToast('Sačuvano i preuzeto');
+  showToast('Preuzeto kao JSON');
 }
 
 function ucitajSpremljeno() {
@@ -1239,17 +1307,15 @@ function ucitajData(data) {
   rows  = (data.rows||[]).map(r => ({...r, photos: r.photos||[], expanded: false}));
   idCnt = data.idCnt || (rows.length ? Math.max(...rows.map(r=>r.id))+1 : 0);
   renderLista(); updateStats(); updateMetaBarVisibility();
+  autoSave();
 }
 
 function autoSave() {
-  try { localStorage.setItem('kp_autosave', JSON.stringify({meta:getMeta(), rows:rows.map(r=>({...r})), idCnt})); } catch(e) {}
+  saveActive();
 }
 
 function novaLista() {
-  if (rows.length > 0 && !confirm('Obrisati sve i početi novu listu?')) return;
-  rows = []; idCnt = 0;
-  setMeta({odjel:'', datum:new Date().toISOString().split('T')[0], kontrolor:'', primka:'', napomena:''});
-  renderLista(); updateStats(); updateMetaBarVisibility(); showToast('Nova lista');
+  backToHome();
 }
 
 // ══════════════════════════════════════════
@@ -1805,6 +1871,161 @@ async function exportPDF() {
   } finally {
     document.getElementById('pdf-overlay').classList.remove('open');
   }
+}
+
+// ══════════════════════════════════════════
+//  MULTI-KONTROLA
+// ══════════════════════════════════════════
+function genId() {
+  return 'k' + Date.now() + Math.random().toString(36).slice(2, 7);
+}
+
+function loadAll() {
+  try { kontrole = JSON.parse(localStorage.getItem('kp_kontrole') || '[]'); } catch(e) { kontrole = []; }
+  // Migracija starog kp_autosave u novi format
+  if (kontrole.length === 0) {
+    try {
+      const old = localStorage.getItem('kp_autosave');
+      if (old) {
+        const data = JSON.parse(old);
+        if (data.rows && data.rows.length > 0) {
+          kontrole.push({
+            id: genId(), meta: data.meta || {},
+            rows: data.rows, idCnt: data.idCnt || data.rows.length,
+            created: new Date().toISOString(), updated: new Date().toISOString()
+          });
+          saveAll();
+        }
+      }
+    } catch(e) {}
+  }
+}
+
+function saveAll() {
+  try { localStorage.setItem('kp_kontrole', JSON.stringify(kontrole)); } catch(e) {}
+}
+
+function saveActive() {
+  if (!activeId) return;
+  const idx = kontrole.findIndex(k => k.id === activeId);
+  if (idx < 0) return;
+  kontrole[idx] = {
+    ...kontrole[idx],
+    meta: getMeta(),
+    rows: rows.map(r => ({...r})),
+    idCnt,
+    updated: new Date().toISOString()
+  };
+  saveAll();
+}
+
+function showScreen(name) {
+  document.getElementById('screen-home').style.display     = name === 'home'     ? '' : 'none';
+  document.getElementById('screen-kontrola').style.display = name === 'kontrola' ? '' : 'none';
+}
+
+function novaKontrola() {
+  const k = {
+    id: genId(),
+    meta: { odjel: '', datum: new Date().toISOString().split('T')[0], kontrolor: '', primka: '', napomena: '' },
+    rows: [], idCnt: 0,
+    created: new Date().toISOString(), updated: new Date().toISOString()
+  };
+  kontrole.unshift(k);
+  saveAll();
+  openKontrola(k.id);
+}
+
+function openKontrola(id) {
+  const k = kontrole.find(k => k.id === id);
+  if (!k) return;
+  activeId = id;
+  rows = k.rows.map(r => ({...r}));
+  idCnt = k.idCnt || 0;
+  setMeta(k.meta);
+  document.getElementById('filter-vrsta').value   = '';
+  document.getElementById('filter-razlika').value = '';
+  renderLista(); updateStats(); updateMetaBarVisibility();
+  showScreen('kontrola');
+  window.scrollTo(0, 0);
+}
+
+function backToHome() {
+  saveActive();
+  activeId = null;
+  rows = []; idCnt = 0;
+  renderHome();
+  showScreen('home');
+  window.scrollTo(0, 0);
+}
+
+function renderHome() {
+  const lista = document.getElementById('home-lista');
+  if (kontrole.length === 0) {
+    lista.innerHTML = `<div class="empty-state">
+      <div class="ei">🌲</div>
+      <h3>Nema sačuvanih kontrola</h3>
+      <p>Tapni zeleno <strong>+</strong> dugme da kreiraš prvu kontrolu.</p>
+    </div>`;
+    return;
+  }
+  const groups = {};
+  kontrole.forEach(k => {
+    const odjel = (k.meta && k.meta.odjel) ? k.meta.odjel : '(bez odjela)';
+    if (!groups[odjel]) groups[odjel] = [];
+    groups[odjel].push(k);
+  });
+  const sorted = Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0], 'bs'));
+  lista.innerHTML = '';
+  sorted.forEach(([odjel, ks]) => {
+    const grp = document.createElement('div');
+    grp.className = 'odjel-group';
+    grp.innerHTML = `<div class="odjel-label">${esc(odjel)}</div>`;
+    ks.forEach(k => grp.appendChild(makeKontrolaCard(k)));
+    lista.appendChild(grp);
+  });
+}
+
+function makeKontrolaCard(k) {
+  const nRows     = k.rows ? k.rows.length : 0;
+  const nDiff     = k.rows ? k.rows.filter(r => rowHasDiff(r)).length : 0;
+  const datum     = (k.meta && k.meta.datum)     ? k.meta.datum     : '—';
+  const primac    = (k.meta && k.meta.primka)    ? k.meta.primka    : '(bez primača)';
+  const kontrolor = (k.meta && k.meta.kontrolor) ? k.meta.kontrolor : '—';
+  const hasDiff   = nDiff > 0;
+  const statusStr = nRows === 0 ? '' :
+    hasDiff ? `<span style="color:var(--red)">${nDiff} razlika</span>` :
+              `<span style="color:var(--gm)">bez razlika</span>`;
+  const div = document.createElement('div');
+  div.className = 'kard' + (hasDiff ? ' kard-diff' : (nRows > 0 ? ' kard-ok' : ''));
+  div.innerHTML = `
+    <div class="kard-row">
+      <div class="kard-info">
+        <div class="kard-title">${esc(datum)} &nbsp;·&nbsp; <span class="kard-primac">${esc(primac)}</span></div>
+        <div class="kard-sub">Kontrolor: ${esc(kontrolor)}</div>
+        <div class="kard-sub">${nRows} sortiment${nRows === 1 ? '' : 'a'}${statusStr ? ' &nbsp;·&nbsp; ' + statusStr : ''}</div>
+      </div>
+      <div class="kard-side">
+        <div class="diff-dot ${hasDiff ? 'bad' : (nRows > 0 ? 'ok' : '')}"></div>
+        <button class="kard-del-btn" title="Obriši">🗑</button>
+        <span class="kard-arrow">›</span>
+      </div>
+    </div>`;
+  div.querySelector('.kard-info').addEventListener('click', () => openKontrola(k.id));
+  div.querySelector('.kard-arrow').addEventListener('click', () => openKontrola(k.id));
+  div.querySelector('.kard-del-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    obrisiKontrolu(k.id);
+  });
+  return div;
+}
+
+function obrisiKontrolu(id) {
+  if (!confirm('Obrisati ovu kontrolu? Podaci se ne mogu vratiti.')) return;
+  kontrole = kontrole.filter(k => k.id !== id);
+  saveAll();
+  renderHome();
+  showToast('Kontrola obrisana');
 }
 
 function loadScript(src) {
