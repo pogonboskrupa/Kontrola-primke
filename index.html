@@ -405,6 +405,40 @@ body {
 .pdf-overlay p { color: white; font-size: 15px; font-weight: 600; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ══ REKAP TABLA ══ */
+.rekap-meta {
+  font-size: 12px; color: var(--g5);
+  background: var(--g1); border-radius: 8px;
+  padding: 8px 12px; margin-bottom: 12px; line-height: 1.8;
+}
+.rekap-meta strong { color: var(--g9); }
+.rekap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 4px; }
+.rekap-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+  min-width: 420px;
+}
+.rekap-table th {
+  background: var(--gd); color: white;
+  padding: 7px 6px; text-align: center;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.rekap-table th:first-child, .rekap-table th:nth-child(2) { text-align: left; }
+.rekap-table td {
+  padding: 7px 6px; border-bottom: 1px solid var(--g1);
+  vertical-align: middle; white-space: nowrap;
+}
+.rekap-table td:nth-child(n+3) { text-align: right; }
+.rekap-table td:nth-child(3) { text-align: center; }
+.rekap-table tbody tr:hover { background: var(--g1); }
+.rekap-table tfoot td {
+  background: var(--gp); font-weight: 700;
+  border-top: 2px solid var(--gm); padding: 9px 6px;
+}
+.rekap-table tfoot td:nth-child(n+3) { text-align: right; }
+.rekap-table tfoot td:nth-child(3) { text-align: center; }
+
 /* ══ VOL DISPLAY ══ */
 .vol-display {
   margin-top: 7px; padding: 7px 12px;
@@ -676,6 +710,13 @@ body {
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <h3>Opcije</h3>
+    <div class="menu-item" onclick="zatvoriModal('modal-meni');otvoriRekap()">
+      <div class="menu-icon mi-amber">📊</div>
+      <div>
+        <div>Rekap kontrole</div>
+        <div style="font-size:12px;color:var(--g5);">Pregled po vrsti i sortimentu – ukupni volumeni</div>
+      </div>
+    </div>
     <div class="menu-item" onclick="spremi();zatvoriModal('modal-meni')">
       <div class="menu-icon mi-green">💾</div>
       <div>
@@ -760,6 +801,18 @@ body {
     <p id="foto-empty" style="font-size:13px;color:var(--g5);text-align:center;padding:8px 0;display:none;">Nema fotografija.</p>
     <div class="modal-btns" style="margin-top:8px;">
       <button class="btn btn-cancel" onclick="zatvoriModal('modal-foto')">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REKAP MODAL ══ -->
+<div class="modal-overlay" id="modal-rekap" onclick="zatvoriModal('modal-rekap')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:92vh">
+    <div class="modal-handle"></div>
+    <h3>📊 Rekap kontrole</h3>
+    <div id="rekap-sadrzaj"></div>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="zatvoriModal('modal-rekap')">Zatvori</button>
     </div>
   </div>
 </div>
@@ -1351,6 +1404,101 @@ function deleteFoto(idx) {
 function otvoriMeni()  { otvoriModal('modal-meni'); }
 function otvoriUvoz()  { otvoriModal('modal-uvoz'); }
 function otvoriModal(id) { document.getElementById(id).classList.add('open'); }
+
+// ══════════════════════════════════════════
+//  REKAP KONTROLE
+// ══════════════════════════════════════════
+function otvoriRekap() {
+  const meta = getMeta();
+  const el = document.getElementById('rekap-sadrzaj');
+
+  if (rows.length === 0) {
+    el.innerHTML = '<p style="text-align:center;color:var(--g5);padding:24px 0">Nema zapisa za prikaz.</p>';
+    otvoriModal('modal-rekap');
+    return;
+  }
+
+  // Grupiši po vrsta + kSort (sortiment kontrolnog premjera)
+  const grupe = {};
+  rows.forEach(r => {
+    const vrsta = r.vrsta || '—';
+    const sort  = r.kSort || r.rSort || '—';
+    const key   = vrsta + '||' + sort;
+    if (!grupe[key]) grupe[key] = { vrsta, sort, kom: 0, vK: 0, vR: 0, diffKom: 0 };
+    const g = grupe[key];
+    g.kom++;
+    const vK = calcVRow(r, 'k'), vR = calcVRow(r, 'r');
+    if (vK !== null) g.vK += vK;
+    if (vR !== null) g.vR += vR;
+    if (rowHasDiff(r)) g.diffKom++;
+  });
+
+  const sortirane = Object.values(grupe).sort((a, b) =>
+    a.vrsta.localeCompare(b.vrsta, 'bs') || a.sort.localeCompare(b.sort, 'bs')
+  );
+
+  let totKom = 0, totVK = 0, totVR = 0, totDiffKom = 0;
+  sortirane.forEach(g => { totKom += g.kom; totVK += g.vK; totVR += g.vR; totDiffKom += g.diffKom; });
+
+  const fmtV = v => v.toFixed(3);
+  const fmtD = (dv, vr) => {
+    const s = (dv >= 0 ? '+' : '') + dv.toFixed(3);
+    const pct = vr > 0 ? ((dv / vr) * 100).toFixed(1) : null;
+    return s + (pct !== null ? ' (' + (dv >= 0 ? '+' : '') + pct + '%)' : '');
+  };
+  const clsD = dv => Math.abs(dv) < 0.001 ? 'color:var(--g5)' : (dv > 0 ? 'color:var(--red);font-weight:700' : 'color:var(--blue);font-weight:700');
+
+  let redovi = '';
+  sortirane.forEach(g => {
+    const dv = g.vK - g.vR;
+    redovi += `<tr>
+      <td>${esc(g.vrsta)}</td>
+      <td>${esc(g.sort)}</td>
+      <td>${g.kom}</td>
+      <td>${fmtV(g.vK)}</td>
+      <td>${fmtV(g.vR)}</td>
+      <td style="${clsD(dv)}">${fmtD(dv, g.vR)}</td>
+      <td style="${g.diffKom > 0 ? 'color:var(--red);font-weight:700' : 'color:var(--g5)'}">${g.diffKom || '—'}</td>
+    </tr>`;
+  });
+
+  const totDv = totVK - totVR;
+  el.innerHTML = `
+    <div class="rekap-meta">
+      Primač: <strong>${esc(meta.primka || '—')}</strong> &nbsp;·&nbsp;
+      Odjel: <strong>${esc(meta.odjel || '—')}</strong> &nbsp;·&nbsp;
+      Datum: <strong>${esc(meta.datum || '—')}</strong> &nbsp;·&nbsp;
+      Kontrolant: <strong>${esc(meta.kontrolor || '—')}</strong>
+    </div>
+    <div class="rekap-wrap">
+      <table class="rekap-table">
+        <thead>
+          <tr>
+            <th>Vrsta drveta</th>
+            <th>Sortiment</th>
+            <th>Kom.</th>
+            <th>V Kontr. (m³)</th>
+            <th>V Redn. (m³)</th>
+            <th>Razlika (m³ / %)</th>
+            <th>Razl. kom.</th>
+          </tr>
+        </thead>
+        <tbody>${redovi}</tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">UKUPNO</td>
+            <td>${totKom}</td>
+            <td>${fmtV(totVK)}</td>
+            <td>${fmtV(totVR)}</td>
+            <td style="${clsD(totDv)}">${fmtD(totDv, totVR)}</td>
+            <td style="${totDiffKom > 0 ? 'color:var(--red)' : 'color:var(--g5)'}">${totDiffKom || '—'}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>`;
+
+  otvoriModal('modal-rekap');
+}
 function zatvoriModal(id) { document.getElementById(id).classList.remove('open'); }
 
 // ══════════════════════════════════════════
