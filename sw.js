@@ -1,4 +1,4 @@
-const CACHE = 'kp-v5';
+const CACHE = 'kp-v6';
 const ASSETS = [
   './',
   './index.html',
