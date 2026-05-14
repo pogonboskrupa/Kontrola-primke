@@ -1033,7 +1033,7 @@ function makeCard(r, num) {
     </div>
     <div class="vol-display">
       <span class="vol-display-label">Zapremina K${isOgrCijepani(r.kSort)?' (složajni m³)':' – Huber (m³)'}</span>
-      <span class="vol-display-value" id="vol-k-${r.id}">${vK !== null ? vK.toFixed(4)+' m³' : '—'}</span>
+      <span class="vol-display-value" id="vol-k-${r.id}">${vK !== null ? vK.toFixed(2)+' m³' : '—'}</span>
     </div>
     <div class="input-row single">
       <div class="field-group">
@@ -1068,7 +1068,7 @@ function makeCard(r, num) {
     </div>
     <div class="vol-display redovni">
       <span class="vol-display-label">Zapremina R${isOgrCijepani(r.rSort)?' (složajni m³)':' – Huber (m³)'}</span>
-      <span class="vol-display-value" id="vol-r-${r.id}">${vR !== null ? vR.toFixed(4)+' m³' : '—'}</span>
+      <span class="vol-display-value" id="vol-r-${r.id}">${vR !== null ? vR.toFixed(2)+' m³' : '—'}</span>
     </div>
   </div>`;
 
@@ -1194,8 +1194,8 @@ function updateVolDisplay(rowId) {
   const vR = calcVRow(r, 'r');
   const vkEl = document.getElementById(`vol-k-${rowId}`);
   const vrEl = document.getElementById(`vol-r-${rowId}`);
-  if (vkEl) vkEl.textContent = vK !== null ? vK.toFixed(4) + ' m³' : '—';
-  if (vrEl) vrEl.textContent = vR !== null ? vR.toFixed(4) + ' m³' : '—';
+  if (vkEl) vkEl.textContent = vK !== null ? vK.toFixed(2) + ' m³' : '—';
+  if (vrEl) vrEl.textContent = vR !== null ? vR.toFixed(2) + ' m³' : '—';
 }
 
 function updateCardDiffs(r) {
@@ -1440,9 +1440,9 @@ function otvoriRekap() {
   let totKom = 0, totVK = 0, totVR = 0, totDiffKom = 0;
   sortirane.forEach(g => { totKom += g.kom; totVK += g.vK; totVR += g.vR; totDiffKom += g.diffKom; });
 
-  const fmtV = v => v.toFixed(3);
+  const fmtV = v => v.toFixed(2);
   const fmtD = (dv, vr) => {
-    const s = (dv >= 0 ? '+' : '') + dv.toFixed(3);
+    const s = (dv >= 0 ? '+' : '') + dv.toFixed(2);
     const pct = vr > 0 ? ((dv / vr) * 100).toFixed(1) : null;
     return s + (pct !== null ? ' (' + (dv >= 0 ? '+' : '') + pct + '%)' : '');
   };
@@ -1592,7 +1592,7 @@ function exportWord() {
   if (rows.length === 0) { showToast('Nema zapisa za izvoz'); return; }
 
   const MIN_ROWS = 20;
-  const fmtV = v => v !== null ? v.toFixed(3) : '';
+  const fmtV = v => v !== null ? v.toFixed(2) : '';
   const fmtD = v => v ? parseFloat(v).toFixed(2) : '';
 
   const dataRows = rows.map(r => {
@@ -1898,9 +1898,9 @@ async function exportPDF() {
       {lab:'RAZLIKE PRECNIK',val:String(diffPrec),                                cr:diffPrec>0},
       {lab:'RAZLIKE DUZINA', val:String(diffDuz),                                 cr:diffDuz>0},
       {lab:'RAZLIKE KLASA',  val:String(diffKlas),                                cr:diffKlas>0},
-      {lab:'ZAP. KONTR. m3', val:totalVK.toFixed(3),                              cr:false},
-      {lab:'ZAP. REDN. m3',  val:totalVR.toFixed(3),                              cr:false},
-      {lab:'DELTA ZAP. m3',  val:(dV0>=0?'+':'')+dV0.toFixed(3),                 cr:Math.abs(dV0)>0.001},
+      {lab:'ZAP. KONTR. m3', val:totalVK.toFixed(2),                              cr:false},
+      {lab:'ZAP. REDN. m3',  val:totalVR.toFixed(2),                              cr:false},
+      {lab:'DELTA ZAP. m3',  val:(dV0>=0?'+':'')+dV0.toFixed(2),                 cr:Math.abs(dV0)>0.001},
     ];
     const spw = CW / statPolja.length;
     statPolja.forEach(({lab,val,cr}, i) => {
@@ -2002,7 +2002,7 @@ async function exportPDF() {
       const dVrow  = (vK!==null&&vR!==null) ? (vK-vR) : null;
       const dSort  = (r.kSort&&r.rSort&&r.kSort!==r.rSort)
                      ? r.kSort.substring(0,7)+'->'+r.rSort.substring(0,7) : '';
-      const dvStr  = dVrow!==null ? (dVrow>=0?'+':'')+dVrow.toFixed(3) : '-';
+      const dvStr  = dVrow!==null ? (dVrow>=0?'+':'')+dVrow.toFixed(2) : '-';
 
       // Pozadina
       if (hd) { doc.setFillColor(255,241,240); }
