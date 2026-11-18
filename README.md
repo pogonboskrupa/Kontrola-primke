@@ -4,9 +4,14 @@ Aplikacija za kontrolu primke i sječe u šumarstvu. Radi **potpuno offline** �
 
 ## Karakteristike
 
-- **Offline-first** — jedna HTML datoteka, nula dependencija, nula interneta potrebno
-- **Automatsko čuvanje** — sve se sprema u browser lokalnu memoriju (localStorage)
+- **Offline-first PWA** — service worker kešira aplikaciju i PDF biblioteku (`vendor/jspdf.umd.min.js`, bez CDN-a); HTML se osvježava network-first s fallbackom na keš
+- **Automatsko čuvanje** — IndexedDB (stotine MB umjesto ~5 MB localStorage-a), snimanje po kontroli, indikator „Sačuvano HH:MM“ i upozorenje kad je memorija puna; stari localStorage podaci se automatski migriraju
+- **Fotografije** — automatski smanjene na 1600 px / JPEG prije snimanja
+- **Ažuriranja** — nova verzija se ne nameće usred unosa; pojavi se traka „Osvježi“
+- **Pregled** — sumarni pokazatelji, pretraga kontrola, volumeni K/R/Δ po kontroli, pretraga po pločici, poništavanje brisanja
+- **Backup / Restore** — sve kontrole (s fotografijama) u jednom JSON fajlu; meni ⋮ na početnom ekranu
 - **Spremi/Učitaj** — JSON format za prenos između uređaja
+- **Tamni režim** — prati podešavanje sistema
 - **Izvoz CSV** — kompatibilno s Excelom (BOM encoding)
 - **Štampanje** — optimizovano za A4
 - **Filtriranje** — po vrsti drveta i po razlikama
@@ -63,7 +68,11 @@ Razlike se računaju automatski (crveno = razlika, plavo = manji od kontrolnog)
 
 ```
 kontrola-primke/
-└── index.html    ← cijela aplikacija (sve u jednom fajlu)
+├── index.html               ← cijela aplikacija (UI + logika)
+├── sw.js                    ← service worker (offline keš, ažuriranja)
+├── manifest.json            ← PWA manifest
+├── icons/
+└── vendor/jspdf.umd.min.js  ← jsPDF 4.2.1 (lokalno, radi offline)
 ```
 
 ## GitHub Pages — postavljanje
